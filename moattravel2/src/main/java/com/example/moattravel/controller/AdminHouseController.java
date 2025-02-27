@@ -6,22 +6,31 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.moattravel.entity.House;
+import com.example.moattravel.form.HouseRegisterForm;
 import com.example.moattravel.repository.HouseRepository;
+import com.example.moattravel.service.HouseService;
 
 @Controller
 @RequestMapping("/admin/houses") //ルートパスの基準値を設定する（他の場所で@GetMapping  などを使った場合に指定したルートパス（今回は　/admin/houses）を省略できるようになる）
 public class AdminHouseController {
 	private final HouseRepository houseRepository;//DIするための準備
+	private final HouseService houseService;
 
 	//@Autowired　はコンストラクタが１つしか存在しない場合、省略できる
-	public AdminHouseController(HouseRepository houseRepository) {//コンストラクタでDIを行う（コンストラクタインジェクション）
+	public AdminHouseController(HouseRepository houseRepository, HouseService houseService) {//コンストラクタでDIを行う（コンストラクタインジェクション）
 		this.houseRepository = houseRepository;
+		this.houseService = houseService;
 	}
 
 	@GetMapping
@@ -52,5 +61,26 @@ public class AdminHouseController {
 		model.addAttribute("house", house);
 		
 		return "admin/houses/show";
+	}
+	
+	@GetMapping("/register")
+	public String register(Model model) {
+		model.addAttribute("houseRegisterForm", new HouseRegisterForm());//デフォルトのオブジェクトを用意することで、nullにならず安全にデータを使える。フォームから送信されたデータを格納するためにインスタンス化をしている（インスタンス化しないとフォームとデータの紐付けができない）
+		return "admin/houses/register";
+	}
+	
+	@PostMapping("/create")
+	//@ModelAttribute フォームから送られたリクエストパラメータを自動的に格納してくれる
+	//@Validated フォームから送られてきたデータがHouseRegisterFormに設定されたバリデーションを参照してエラーがないかチェックする
+	//BindingResult バリデーションで検証した結果が格納される
+	public String create(@ModelAttribute @Validated HouseRegisterForm houseRegisterForm, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+		if (bindingResult.hasErrors()) {//検証でエラーが出ていた場合に処理される
+			return "admin/houses/register";//入力フォームに返してもう一度入力し直すようにする
+		}
+		
+		houseService.create(houseRegisterForm);//houseServiceのcreate()を呼び出して、データを登録する
+		redirectAttributes.addFlashAttribute("successMessage", "民宿を登録しました。");//リダイレクト後に一度だけ表示するメッセージを設定
+		
+		return "redirect:/admin/houses";//ページを再読み込みしても同じデータが二重で登録されないようにする
 	}
 }

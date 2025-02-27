@@ -13,7 +13,7 @@ public class HouseRegisterForm {
 	@NotBlank(message = "民宿名を入力してください。")
 	private String name;
 	
-	private MultipartFile imageFile;
+	private MultipartFile imageFile;//MultipartFile ファイルを受け取るための型、フォームやAPIで画像やPDFファイルをアップロードするときに使用
 	
 	@NotBlank(message = "説明を入力してください。")
 	private String description;
