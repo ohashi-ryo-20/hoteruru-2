@@ -7,6 +7,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -31,6 +32,7 @@ public class AdminHouseController {
 			//name属性：取得するリクエストパラメータ名、required属性：そのリクエストパラメータが必須かどうか（デフォルトでtrue）
 			@RequestParam(name = "keyword", required = false) String keyword) {
 		Page<House> housePage;
+		
 		if (keyword != null && !keyword.isEmpty()) {//isEmpty()　Stringは文字列が空(0)であればtrueになる、これだけで使うとnullの場合エラーになるので、nullチェックを一緒に使う必要がある(keyword != null)
 			housePage = houseRepository.findByNameLike("%" + keyword + "%", pageable);//部分一致検索を行っている %は0文字以上の任意の文字
 		} else {
@@ -41,5 +43,14 @@ public class AdminHouseController {
 		model.addAttribute("keyword", keyword);
 
 		return "admin/houses/index";//  admin/houses/index.htmlファイルに渡す
+	}
+	
+	@GetMapping("/{id}")//{id}にすることでidの値が入る
+	public String show(@PathVariable(name = "id") Integer id, Model model) {//@PathVariable URLの一部を変数としてメソッドに渡す 例：/{id} が6の場合、Integer id に6が格納される
+		House house = houseRepository.getReferenceById(id);//getReferenceById() まだデータベースにはアクセスせずに、Houseの擬似オブジェクトを生成し、house.getName()などのフィールドにアクセスした瞬間にデータを取得する（必要になるまでデータを取得しない）
+		
+		model.addAttribute("house", house);
+		
+		return "admin/houses/show";
 	}
 }
