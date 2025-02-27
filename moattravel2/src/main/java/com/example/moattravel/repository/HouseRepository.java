@@ -1,5 +1,7 @@
 package com.example.moattravel.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.moattravel.entity.House;
@@ -14,5 +16,5 @@ import com.example.moattravel.entity.House;
 //findByName()　sprinJPAが自動的に　SELECT * FROM users WHERE name = ?　を生成する
 //findAll(Pageable pageable)　ページネーションを行い、指定されたページのデータを返す
 public interface HouseRepository extends JpaRepository<House, Integer> {//ジェネリクス(<>)の中身には<エンティティのクラス型,主キーのデータ型>を指定する
-
+	public Page<House> findByNameLike(String keyword, Pageable pageable);//公式リファレンスに記載されているキーワードを使った独自のメソッドを追加することができる
 }
