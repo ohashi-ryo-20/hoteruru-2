@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.moattravel.entity.House;
+import com.example.moattravel.form.HouseEditForm;
 import com.example.moattravel.form.HouseRegisterForm;
 import com.example.moattravel.repository.HouseRepository;
 import com.example.moattravel.service.HouseService;
@@ -82,5 +83,39 @@ public class AdminHouseController {
 		redirectAttributes.addFlashAttribute("successMessage", "民宿を登録しました。");//リダイレクト後に一度だけ表示するメッセージを設定
 		
 		return "redirect:/admin/houses";//ページを再読み込みしても同じデータが二重で登録されないようにする
+	}
+	
+	@GetMapping("/{id}/edit")
+	public String edit(@PathVariable(name = "id") Integer id, Model model) {
+		House house = houseRepository.getReferenceById(id);
+		String imageName = house.getImageName();//更新前の民宿画像はファイル名を渡して表示するため、MultipartFile型のファイルを直接渡さなくて良い
+		//どのデータを更新するかという情報が必要なため、フォームクラスに更新前のデータを格納し、インスタンス化する
+		HouseEditForm houseEditForm = new HouseEditForm(house.getId(), house.getName(), null, house.getDescription(), house.getPrice(), house.getCapacity(), house.getPostalCode(), house.getAddress(), house.getPhoneNumber());
+		
+		model.addAttribute("imageName", imageName);
+		model.addAttribute("houseEditForm", houseEditForm);
+		
+		return "admin/houses/edit";
+	}
+	
+	@PostMapping("/{id}/update")
+	public String update(@ModelAttribute @Validated HouseEditForm houseEditForm, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+		if (bindingResult.hasErrors()) {
+			return "admin/houses/edit";
+		}
+		
+		houseService.update(houseEditForm);
+		redirectAttributes.addFlashAttribute("successMessage", "民宿情報を編集しました。");
+		
+		return "redirect:/admin/houses";
+	}
+	
+	@PostMapping("/{id}/delete")
+	public String delete(@PathVariable(name = "id") Integer id, RedirectAttributes redirectAttributes) {
+		houseRepository.deleteById(id);
+		
+		redirectAttributes.addFlashAttribute("successMessage", "民宿を削除しました。");
+		
+		return "redirect:/admin/houses";
 	}
 }
