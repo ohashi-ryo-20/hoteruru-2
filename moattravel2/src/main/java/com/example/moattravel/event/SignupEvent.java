@@ -12,7 +12,7 @@ public class SignupEvent extends ApplicationEvent {
 	private String requestUrl;
 	
 	public SignupEvent(Object source, User user, String requestUrl) {
-		super(source);
+		super(source);//イベントの発生元を指定
 		
 		this.user = user;
 		this.requestUrl = requestUrl;
