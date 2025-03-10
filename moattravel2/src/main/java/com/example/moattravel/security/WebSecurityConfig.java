@@ -18,7 +18,7 @@ public class WebSecurityConfig {
 		http
 			.authorizeHttpRequests((requests) -> requests
 					// /**　を使用することでその後のパスは全てが対象になる
-					.requestMatchers("/css/**", "/images/**", "/js/**", "/storage/**", "/", "/signup/**", "/houses", "houses/{id}").permitAll()//全てのユーザーにアクセスを許可するURL
+					.requestMatchers("/css/**", "/images/**", "/js/**", "/storage/**", "/", "/signup/**", "/houses", "/houses/{id}", "/stripe/webhook").permitAll()//全てのユーザーにアクセスを許可するURL
 					.requestMatchers("/admin/**").hasRole("ADMIN") //管理者にのみアクセスを許可するURL
 					.anyRequest().authenticated()//上記以外のURLはログインが必要（会員または管理者のどちらでもOK）
 					)
@@ -32,7 +32,8 @@ public class WebSecurityConfig {
 					.logout((logout) -> logout
 							.logoutSuccessUrl("/?loggedOut")//ログアウト時のリダイレクト先URL
 							.permitAll()
-							);
+							)
+		.csrf().ignoringRequestMatchers("/stripe/webhook");
 					return http.build();//DIコンテナに登録される
 					
 	}
